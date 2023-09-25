@@ -1,22 +1,15 @@
-import { Component } from 'react';
 import { ImageGallery, SearchBar } from 'components';
+import { useState } from 'react';
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-  };
+export default function App() {
+  const [searchQuery, setSearchQuery] = useState('');
 
-  handleSearch = query => {
-    this.setState({ searchQuery: query });
-  };
+  const handleSearch = query => setSearchQuery({ query });
 
-  render() {
-    const { searchQuery } = this.state;
-    return (
-      <>
-        <SearchBar onSubmit={this.handleSearch} />
-        <ImageGallery searchQuery={searchQuery} />
-      </>
-    );
-  }
+  return (
+    <>
+      <SearchBar onSubmit={handleSearch} />
+      <ImageGallery searchQuery={searchQuery} />
+    </>
+  );
 }
