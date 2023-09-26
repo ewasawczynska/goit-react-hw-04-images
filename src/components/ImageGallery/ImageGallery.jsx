@@ -1,61 +1,57 @@
-import { useState, useEffect } from 'react';
-import { fetchImagesWithQuery } from 'services/api';
+import { useState, useEffect, useCallback } from 'react';
 import { Button, ImageGalleryItem, Loader, Modal } from 'components';
 import '../../styles.css';
+import axios from 'axios';
 
-export default function ImageGallery() {
+const searchParams = new URLSearchParams({
+  key: '38224986-73ed753b6801a898f531e9036',
+  image_type: 'photo',
+  orientation: 'horizontal',
+  safesearch: true,
+  per_page: 12,
+});
+
+export function ImageGallery({ searchQuery }) {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [pages, setPages] = useState(1);
+  const [selectedImage, setSelectedImage] = useState('');
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [error, setError] = useState('');
 
-  // useEffect(() => {
-  //   const query = this.props.searchQuery;
-  //   if (query !== prevProps.searchQuery) {
-  //     (setImages([])), setPages(1), () => {
-  //       fetchImages(query, 1);
-  //     }
-  //   }
-  //   if (pages => !pages) {
-  //     loadMoreImages(query, page)
-  //   }
-  // }, [query, pages, fetchImages ]);
+  const fetchImages = useCallback(() => {
+    setIsLoading(true);
+    axios
+      .get(
+        `https://pixabay.com/api/?${searchParams}&q=${encodeURIComponent(
+          searchQuery
+        )}&page=${page}`
+      )
+      .then(response => {
+        setImages(prev => [...prev, ...response.data.hits]);
+        const totalPages = Math.floor(response.data.total / 12);
+        setTotalPages(totalPages);
+      })
+      .catch(error => console.error('Houston, we have a problem:', error))
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [searchQuery, page]);
 
-  //   useEffect(() => {
-  //   (async fetchImages(query, page) {
-  //     setIsLoading(true)};
-  //     try {
-  //       const response = await fetchImagesWithQuery(query, page);
-  //       const data = response.data.hits;
-  //       const totalPages = Math.floor(response.data.total / 12);
-  //       setImages(data);
-  //       setPages(1);
-  //       setTotalPages(totalPages);
-  //     } catch (error) {
-  //       setError({ error });
-  //     } finally {
-  //       setIsLoading(false );
-  //     })
-  //   }, []);
+  useEffect(() => {
+    if (searchQuery === '') return;
+    fetchImages();
+  }, [page]);
 
-  //     async loadMoreImages(query, page) {
-  //     setIsLoading(true);
-  //       try {
-  //         const response = await fetchImagesWithQuery(query, page);
-  //         const data = response.data.hits;
-  //         setImages(prev => [...prev, ...data]);
-  //       } catch (error) {
-  //         setError({ error });
-  //       } finally {
-  //         setIsLoading(false );
-  //       }
-  //     }
+  useEffect(() => {
+    if (searchQuery !== '') {
+      setImages([]);
+      fetchImages();
+    }
+  }, [searchQuery]);
 
   const handleLoadMore = () => {
-    setPages(prev => prev + 1);
+    setPage(prev => prev + 1);
   };
 
   const openModal = image => {
@@ -76,9 +72,7 @@ export default function ImageGallery() {
         ))}
       </ul>
       {isLoading && <Loader />}
-      {pages < totalPages && (
-        <Button onClick={handleLoadMore}>Load more</Button>
-      )}
+      {page < totalPages && <Button onClick={handleLoadMore}>Load more</Button>}
       {selectedImage && (
         <Modal
           largeImageURL={selectedImage.largeImageURL}

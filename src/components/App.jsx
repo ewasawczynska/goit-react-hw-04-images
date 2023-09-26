@@ -4,7 +4,7 @@ import { useState } from 'react';
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleSearch = query => setSearchQuery({ query });
+  const handleSearch = query => setSearchQuery(query);
 
   return (
     <>
