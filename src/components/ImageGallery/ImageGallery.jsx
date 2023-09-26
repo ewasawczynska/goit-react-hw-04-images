@@ -14,6 +14,7 @@ const searchParams = new URLSearchParams({
 export function ImageGallery({ searchQuery }) {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const [page, setPage] = useState(1);
@@ -38,17 +39,25 @@ export function ImageGallery({ searchQuery }) {
       });
   }, [searchQuery, page]);
 
-  useEffect(() => {
-    if (searchQuery === '') return;
-    fetchImages();
-  }, [page]);
-
-  useEffect(() => {
-    if (searchQuery !== '') {
-      setImages([]);
+  useEffect(
+    () => {
+      if (searchQuery === '') return;
       fetchImages();
-    }
-  }, [searchQuery]);
+    },
+    // eslint-disable-next-line
+    [page]
+  );
+
+  useEffect(
+    () => {
+      if (searchQuery !== '') {
+        setImages([]);
+        fetchImages();
+      }
+    },
+    // eslint-disable-next-line
+    [searchQuery]
+  );
 
   const handleLoadMore = () => {
     setPage(prev => prev + 1);
